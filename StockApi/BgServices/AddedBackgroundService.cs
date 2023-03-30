@@ -23,6 +23,9 @@ namespace StockApi.BgServices
         {
             var options = new ChromeOptions();
             options.AddArgument("--incognito");
+            var count = 0;
+
+            StringBuilder stringBuilder = new StringBuilder();
 
             options.AddArgument("--headless");
 
@@ -68,8 +71,17 @@ namespace StockApi.BgServices
                         context.Stocks.Add(stock);
                         
                         await context.SaveChangesAsync(stoppingToken);
-                        //_telegramService.SendMessage($"stock code:{stock.Code}\t company name:{stock.CompanyName}\t price:{stock.Price}\t percentage of change:{stock.PercentageOfChange}\t change price:{stock.ChangePrice} \n");
-                        //Thread.Sleep(TimeSpan.FromSeconds(1));
+                        stringBuilder.AppendLine($"code:  {stock.Code}\t   price:  {stock.Price}\t date:  {DateTime.Now.ToString()}\t");
+                        count++;
+
+                        if (count == 20)
+                        {
+                            _telegramService.SendMessage(stringBuilder.ToString());
+                            count = 0;
+                            stringBuilder=new StringBuilder();
+                            Thread.Sleep(TimeSpan.FromSeconds(2));
+                        }
+                      
                     }
                    
                 }
